@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
         let last = resp.last().cloned();
         resp = resp
             .into_iter()
-            .filter(|r| r.open_time < next_day_ms)
+            .filter(|r| r.open_time < next_day_ms && r.open_time < end_time_ms)
             .collect();
         cache_tick.extend_from_slice(&resp);
         tracing::info!("cache_tick size: {}", cache_tick.len());
@@ -131,6 +131,7 @@ fn write_file(data: &Vec<KlineRow>, year: i32, month: u32, day: u32) -> Result<(
     use csv::WriterBuilder;
     let file_name = format!("ETHUSDC-1s-{}-{:02}-{:02}.csv", year, month, day);
     let path = std::path::Path::new("1s_klines");
+    tracing::info!("data lenth: {}, file path: {:?}", data.len(), path);
     let path = path.join(file_name);
     let mut wtr = WriterBuilder::new().has_headers(false).from_path(path)?;
     for rec in data {
