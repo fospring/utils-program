@@ -92,7 +92,7 @@ async fn main() -> Result<()> {
                 }
             }
             Some(last) => {
-                if last.open_time >= next_day_ms {
+                if last.close_time + 1 >= next_day_ms {
                     // start next day
                     write_file(
                         &cache_tick,
@@ -131,8 +131,8 @@ fn write_file(data: &Vec<KlineRow>, year: i32, month: u32, day: u32) -> Result<(
     use csv::WriterBuilder;
     let file_name = format!("ETHUSDC-1s-{}-{:02}-{:02}.csv", year, month, day);
     let path = std::path::Path::new("1s_klines");
-    tracing::info!("data lenth: {}, file path: {:?}", data.len(), path);
     let path = path.join(file_name);
+    tracing::info!("data lenth: {}, file path: {:?}", data.len(), path);
     let mut wtr = WriterBuilder::new().has_headers(false).from_path(path)?;
     for rec in data {
         wtr.serialize(rec)?;
