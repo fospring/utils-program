@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         .timestamp_millis();
     let max_end_time_ms = NaiveDate::from_ymd_opt(2024, 6, 1)
         .unwrap()
-        .and_hms_opt(0, 20, 0)
+        .and_hms_opt(0, 19, 59)
         .unwrap()
         .and_utc()
         .timestamp_millis();
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     let mut cache_tick: Vec<KlineRow> = Vec::new();
     let base_url = "https://api.binance.com";
     loop {
-        let end_time_ms = start_time_ms + 10 * 60_000;
+        let end_time_ms = std::cmp::min(start_time_ms + 10 * 60_000 - 1, max_end_time_ms);
         let url = format!(
             "{}/api/v3/klines?startTime={}&endTime={}&limit=1000&symbol=ETHUSDC&interval=1s",
             base_url, start_time_ms, end_time_ms
@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
         let last = resp.last().cloned();
         resp = resp
             .into_iter()
-            .filter(|r| r.open_time < next_day_ms && r.open_time < end_time_ms)
+            .filter(|r| r.open_time < next_day_ms)
             .collect();
         cache_tick.extend_from_slice(&resp);
         tracing::info!("cache_tick size: {}", cache_tick.len());
